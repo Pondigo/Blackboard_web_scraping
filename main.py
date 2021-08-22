@@ -10,7 +10,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 # import requests
 options = webdriver.ChromeOptions()
 options.add_experimental_option('excludeSwitches', ['enable-logging'])
-driver = webdriver.Chrome(options=options)
+driver = webdriver.Chrome(executable_path="./chromedriver", options=options)
 
 def bb_login():
     driver.get("https://click.udlap.mx/webapps/login/")
