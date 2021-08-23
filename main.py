@@ -15,7 +15,8 @@ user_data = file.read().split('\n')
 options = webdriver.ChromeOptions()
 options.add_experimental_option('excludeSwitches', ['enable-logging'])
 driver = webdriver.Chrome(executable_path="./chromedriver", options=options)
-# 
+
+# Function to open login
 def bb_login():
     driver.get("https://click.udlap.mx/webapps/login/")
 
