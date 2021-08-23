@@ -7,6 +7,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.action_chains import ActionChains
+
+file = open("./Personal-Data.txt", "r") # "r" reading file
+user_data = file.read().split('\n')
+
 # import requests
 options = webdriver.ChromeOptions()
 options.add_experimental_option('excludeSwitches', ['enable-logging'])
@@ -23,8 +27,8 @@ bb_login()
 driver.find_element_by_id("agree_button").click()
 
 #Manda usuario y contraseña
-driver.find_element_by_id("user_id").send_keys("ID")
-driver.find_element_by_id("password").send_keys("PASSWORD")
+driver.find_element_by_id("user_id").send_keys(user_data[0])
+driver.find_element_by_id("password").send_keys(user_data[1])
 driver.find_element_by_id("entry-login").click()
 
 #Lee todos los cursos
