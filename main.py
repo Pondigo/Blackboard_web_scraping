@@ -84,6 +84,8 @@ while(currentCourses): {
 
     #Ejecutar script principal
 
+    
+
     #Retornar a listado de cursos 
     currentCourses.pop(-1)
 }
