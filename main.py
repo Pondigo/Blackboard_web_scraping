@@ -60,92 +60,38 @@ wait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//span[contains(te
 time.sleep(1)
 wait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//span[contains(text(),'Blackboard Collaborate Ultra')]"))).click()
 
-#time.sleep(30)
-
 iframeBB = driver.find_element_by_xpath("//*[@id='collabUltraLtiFrame']")
 print(iframeBB)
 driver.switch_to.frame(iframeBB)
 
 wait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//*[@id='side-menu-toggle']"))).click()
-#//*[@id="side-menu"]/div/nav/ul/li[3]/a
+
 wait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//*[@id='side-menu']/div/nav/ul/li[3]/a"))).click()
 
-#//*[@id="session-1b11e635c2aa4494977835c35a09c609-options-dropdown-toggle"]
-#wait(driver, 10).until().click()
+
 print(EC.presence_of_element_located((By.XPATH,"//*[contains(@id, 'options-dropdown-toggle')]")))
 buttonsToSeeNow = driver.find_elements_by_xpath("//*[contains(@id, 'options-dropdown-toggle')]")
 
-
-#button preserve focus-item loading-button      //*[@id="session-1b11e635c2aa4494977835c35a09c609-options-dropdown"]/ul/li/bb-loading-button/button
-
-#presence_of_element_located
-""" 
-count = 0
+#Da click en todos los botones de opcion de grabación
 for button in buttonsToSeeNow:
-    count = count + 1
     button.click()
-    html_collaborate = driver.execute_script("return document.body.innerHTML;")
-    soup = BeautifulSoup(html_collaborate, 'lxml')
-    loadingButtons = soup.find_all('bb-loading-button')
-    print('Botones encontrados:')
-    print(len(loadingButtons))
-    print('Loading buttons:')
-    print(count)
-    print(loadingButtons)
- """
-
-#Busca la lista de los cursos
-
-    #bb-loading-button
-""" 
-divMirarAhora = soup.find_all('button',class_="icon-button session-row-options list-item-icon has-tooltip ng-scope")
-print(len(divMirarAhora))
-for button in divMirarAhora:
-    print('Button:')
-    print(button.get('id'))
-     """
-#,class_="portletList-img courseListing coursefakeclass
-#//*[@id="side-menu-toggle"]
 
 
-
-
-#driver.find_element_by_id("side-menu-toggle").click()
-""" #side-menu-toggle
-try: #side-menu-toggle
-    raise driver.find_element_by_xpath("//span[text()='Sala virtual'") 
-except://*[@id="side-menu-toggle"]
-
-    try:
-        raise driver.find_element_by_xpath("//span[text()='Comunicación'")
-    except:
-        print('Sala virtual and comunicacion not exist')
-
-#containerdiv
- """
 
 """ 
 while(currentCourses): {
     print(currentCourses),
 
+    #Ejecutar script principal
+
+    #Retornar a listado de cursos 
     currentCourses.pop(-1)
 }
-   """  
-
-
-
-
+"""  
 
 
 """ 
-html_login = requests.get('https://click.udlap.mx/webapps/login/')  
-print(html_login)
-soup = BeautifulSoup(html_login.text)
-print(soup)
-
- """
-""" 
-
+#Sirve para encontrar la fuente del video
 soup = BeautifulSoup(html_login,'lxml')
 with open('RecordBB1.html','r') as html_file:
     content = html_file.read()
