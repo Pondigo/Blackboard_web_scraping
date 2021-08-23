@@ -6,4 +6,4 @@
 Queso123
 ```
 2. Install chromedriver on project root folder
-3. Install requirements
+3. Install requirements.txt
