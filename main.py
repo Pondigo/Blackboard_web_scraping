@@ -56,26 +56,49 @@ driver.find_element_by_link_text(currentCourses[-1]).click()
 #Espera a que cargue
 time.sleep(2)
 #Entra a SalaVirtual
-wait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//span[contains(text(),'Sala virtual')]"))).click()
+wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//span[contains(text(),'Sala virtual')]"))).click()
 #Entra a Blackboard Collaborate Ultra
 time.sleep(1)
-wait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//span[contains(text(),'Blackboard Collaborate Ultra')]"))).click()
-
+wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//span[contains(text(),'Blackboard Collaborate Ultra')]"))).click()
+#Entra al iFrame
 iframeBB = driver.find_element_by_xpath("//*[@id='collabUltraLtiFrame']")
-print(iframeBB)
 driver.switch_to.frame(iframeBB)
+time.sleep(10)
+#Abre menu deslizable para seleccionar grabaciones/sesiones
+wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//*[@id='side-menu-toggle']"))).click()
+#Selecciona grabaciones
+wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//*[@id='side-menu']/div/nav/ul/li[3]/a"))).click()
+#Da click en un boton de opcion de grabacion, para que se hagan visibles los demas.
+wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//*[contains(@id, 'options-dropdown-toggle')]"))).click()
 
-wait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//*[@id='side-menu-toggle']"))).click()
+##Busacar boton para mirar ahora con beautifulsoup, debido a que puede tambien estar definido para obtener el enlace 
+#Esta funcion retorna los botones del div que hizo visible el ultimo click
+def getGrabationViewChargeButtons():
+    html_login = driver.execute_script("return document.body.innerHTML;")
+    soup = BeautifulSoup(html_login, 'lxml')
+    trs = soup.find_all('div',class_="dropdown-pane ng-scope ng-isolate-scope is-open")
+    returnButtons = []
+    for tr in trs:
+        buttons = tr.find_all('button')
+        for button in buttons:
+            returnButtons.append(button)
+    return returnButtons
 
-wait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//*[@id='side-menu']/div/nav/ul/li[3]/a"))).click()
+print(getGrabationViewChargeButtons())
 
 
-print(EC.presence_of_element_located((By.XPATH,"//*[contains(@id, 'options-dropdown-toggle')]")))
+
+#//*[@id="session-da99ce96025141fc8abd93dc6b6c2dd1-options-dropdown"]/ul/li/button
+
+
+#Encuentra los botones de opcion de grabación
 buttonsToSeeNow = driver.find_elements_by_xpath("//*[contains(@id, 'options-dropdown-toggle')]")
 
 #Da click en todos los botones de opcion de grabación
 for button in buttonsToSeeNow:
     button.click()
+    print(getGrabationViewChargeButtons())
+
 
 
 
