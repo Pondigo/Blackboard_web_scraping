@@ -73,7 +73,7 @@ wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//*[contains(@id, 
 
 ##Busacar boton para mirar ahora con beautifulsoup, debido a que puede tambien estar definido para obtener el enlace 
 #Esta funcion retorna los botones del div que hizo visible el ultimo click
-def getGrabationViewChargeButtons():
+def getCSSSelectorGrabationViewChargeButtons():
     html_login = driver.execute_script("return document.body.innerHTML;")
     soup = BeautifulSoup(html_login, 'lxml')
     trs = soup.find_all('div',class_="dropdown-pane ng-scope ng-isolate-scope is-open")
@@ -81,10 +81,32 @@ def getGrabationViewChargeButtons():
     for tr in trs:
         buttons = tr.find_all('button')
         for button in buttons:
-            returnButtons.append(button)
+            ariaLabelofCurrentButton = button.get('aria-label')
+            tempCSSSelector = "button"+ "[aria-label='" + str(ariaLabelofCurrentButton) + "']"
+            returnButtons.append(tempCSSSelector)
     return returnButtons
 
-print(getGrabationViewChargeButtons())
+bfr = getCSSSelectorGrabationViewChargeButtons()
+
+try:
+    wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, bfr[0]))).click()
+except:
+    try:
+        wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, bfr[1]))).click()
+        wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, bfr[0]))).click()
+    except:
+        try:
+            wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, bfr[0]))).click()
+        except: 
+            print('No se pudo dar click a ningún boton.')
+        finally:
+            print('Click3')
+    finally:
+        print('Click2')
+finally:
+    print('Click1')
+
+
 
 
 
@@ -97,7 +119,7 @@ buttonsToSeeNow = driver.find_elements_by_xpath("//*[contains(@id, 'options-drop
 #Da click en todos los botones de opcion de grabación
 for button in buttonsToSeeNow:
     button.click()
-    print(getGrabationViewChargeButtons())
+    print(getCSSSelectorGrabationViewChargeButtons())
 
 
 
