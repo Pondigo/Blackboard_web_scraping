@@ -4,7 +4,8 @@
 ### Personal Files ###
 chromedriver*
 Personal-Data.txt
-
+*.mp4
+test.py
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/

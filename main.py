@@ -1,12 +1,11 @@
 import time
 from selenium import webdriver
 from bs4 import BeautifulSoup
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.common.action_chains import ActionChains
+import requests
+
 
 file = open("./Personal-Data.txt", "r") # "r" reading file
 user_data = file.read().split('\n')
@@ -49,6 +48,8 @@ for ultag in containerCourses:
         tempTextLinked = litag.find('a').get_text()
         currentCourses.append(tempTextLinked)
 
+
+
 #Primer curso
 
 #Empieza por el ultimp curso
@@ -88,41 +89,64 @@ def getCSSSelectorGrabationViewChargeButtons():
 
 bfr = getCSSSelectorGrabationViewChargeButtons()
 
-try:
-    wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, bfr[0]))).click()
-except:
+def openRecording(btcav):
     try:
-        wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, bfr[1]))).click()
-        wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, bfr[0]))).click()
+        wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, btcav[1]))).click()
+        wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, btcav[0]))).click()
     except:
         try:
-            wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, bfr[0]))).click()
+            wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, btcav[0]))).click()
         except: 
             print('No se pudo dar click a ningún boton.')
-        finally:
-            print('Click3')
     finally:
-        print('Click2')
-finally:
-    print('Click1')
+        print('Se accedio exitosamente a la primera grabación')
 
+def downloadVideoFromPRO(tabToVideo,name):
+    driver.switch_to_window(tabToVideo)
+    time.sleep(60*5)
+    html = driver.execute_script("return document.body.innerHTML;")
+    soup = BeautifulSoup(html, 'lxml')
+    videoSrc = soup.find('video').get('src')
+    name= str(name) + ".mp4"
+    r=requests.get(videoSrc, timeout=30, stream=True)
+    print ('Conectado para descargar: ' + str(name))
+    f=open(name,'wb')
+    print ("Descargando: " + str(name))
+    for chunk in r.iter_content(chunk_size=255): 
+        if chunk: # filter out keep-alive new chunks
+            f.write(chunk)
+    print ("Se ha completado la descarga de: " + str(name))
+    f.close()
 
+def selectorToNameVideo(cssSelectorMirarAhora):
+    tempName = cssSelectorMirarAhora.split(':')
+    tempName = tempName[1].split(' a las')
+    tempName = tempName[0].replace('/','_')
+    tempName = tempName.lstrip()
+    return tempName
 
-
-
-#//*[@id="session-da99ce96025141fc8abd93dc6b6c2dd1-options-dropdown"]/ul/li/button
-
+openRecording(bfr)
 
 #Encuentra los botones de opcion de grabación
 buttonsToSeeNow = driver.find_elements_by_xpath("//*[contains(@id, 'options-dropdown-toggle')]")
 
+tabs = driver.window_handles
+cTabIndex = tabs.index(driver.current_window_handle)
+tabs.pop(cTabIndex)
+#borrar los ya registrados
+
+downloadVideoFromPRO(tabs[0],selectorToNameVideo(bfr[0]))
+
+buttonsToSeeNow.pop(0)
+
+""" 
 #Da click en todos los botones de opcion de grabación
 for button in buttonsToSeeNow:
     button.click()
-    print(getCSSSelectorGrabationViewChargeButtons())
+    bgvc = getCSSSelectorGrabationViewChargeButtons()
+    openRecording(bgvc)
 
-
-
+""" 
 
 """ 
 while(currentCourses): {
