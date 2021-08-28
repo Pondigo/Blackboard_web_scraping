@@ -5,7 +5,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait as wait
 import requests
-
+import os
+import errno
 
 file = open("./Personal-Data.txt", "r") # "r" reading file
 user_data = file.read().split('\n')
@@ -50,17 +51,33 @@ for ultag in containerCourses:
 
 
 
-#Primer curso
-
-#Empieza por el ultimp curso
+#Empieza por el ultimo curso
 driver.find_element_by_link_text(currentCourses[-1]).click()
+#Define la ruta correspondiente a este curso
+currentDir = str(currentCourses[-1]).replace(':','_')
+
+#Define la ruta de la carpeta o la crea si no existe
+try:
+    os.mkdir(currentDir)
+except OSError as e:
+    if e.errno != errno.EEXIST:
+        raise
 #Espera a que cargue
 time.sleep(2)
+
 #Entra a SalaVirtual
-wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//span[contains(text(),'Sala virtual')]"))).click()
+try:
+    wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//span[contains(text(),'Sala virtual')]"))).click()
+except:
+    try:
+        wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//span[contains(text(),'Comunicación')]"))).click()
+    except:
+        print('Erroooor')
+
 #Entra a Blackboard Collaborate Ultra
 time.sleep(1)
 wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//span[contains(text(),'Blackboard Collaborate Ultra')]"))).click()
+
 #Entra al iFrame
 iframeBB = driver.find_element_by_xpath("//*[@id='collabUltraLtiFrame']")
 driver.switch_to.frame(iframeBB)
@@ -71,6 +88,13 @@ wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//*[@id='side-menu
 wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//*[@id='side-menu']/div/nav/ul/li[3]/a"))).click()
 #Da click en un boton de opcion de grabacion, para que se hagan visibles los demas.
 wait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, "//*[contains(@id, 'options-dropdown-toggle')]"))).click()
+
+tabsOnChrome = []
+nameOfTabsOnChrome = []
+
+tabsOnChrome.append(driver.current_window_handle)
+nameTab = 'CTab recordings of: ' + str(currentCourses[-1])
+nameOfTabsOnChrome.append(nameTab)
 
 ##Busacar boton para mirar ahora con beautifulsoup, debido a que puede tambien estar definido para obtener el enlace 
 #Esta funcion retorna los botones del div que hizo visible el ultimo click
@@ -87,36 +111,56 @@ def getCSSSelectorGrabationViewChargeButtons():
             returnButtons.append(tempCSSSelector)
     return returnButtons
 
-bfr = getCSSSelectorGrabationViewChargeButtons()
-
 def openRecording(btcav):
     try:
-        wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, btcav[1]))).click()
-        wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, btcav[0]))).click()
+        wait(driver, 50).until(EC.element_to_be_clickable((By.CSS_SELECTOR, btcav[1]))).click()
+        wait(driver, 50).until(EC.element_to_be_clickable((By.CSS_SELECTOR, btcav[0]))).click()
+        cTabsOnChrome = driver.window_handles
+        #Buscar en el arreglo las ya existentes
+        for aExistentTabs in tabsOnChrome:
+            cTabsOnChrome.pop(cTabsOnChrome.index(aExistentTabs))
+        if(len(cTabsOnChrome) == 1):
+            tabsOnChrome.append(cTabsOnChrome[0])
+            nameTab = selectorToNameVideo(btcav[0])
+            nameOfTabsOnChrome.append(nameTab)
+        else:
+            print('[ERROR] Las ventanas sobrantes son: ' + str(tabsOnChrome) + '\n\tCon una logitid de: ' + str(len(tabsOnChrome)))
     except:
         try:
             wait(driver, 30).until(EC.element_to_be_clickable((By.CSS_SELECTOR, btcav[0]))).click()
+            cTabsOnChrome = driver.window_handles
+            #Buscar en el arreglo las ya existentes
+            for aExistentTabs in cTabsOnChrome:
+                cTabsOnChrome = tabsOnChrome.pop(tabsOnChrome.index(aExistentTabs))
+            if(len(cTabsOnChrome) == 1):
+                tabsOnChrome.append(cTabsOnChrome[0])
+                nameTab = selectorToNameVideo(btcav[0])
+                nameOfTabsOnChrome.append(nameTab)
+            else:
+                print('[ERROR] Las ventanas sobrantes son: ' + str(tabsOnChrome) + '\n\tCon una logitid de: ' + str(len(tabsOnChrome)))
+                
         except: 
             print('No se pudo dar click a ningún boton.')
     finally:
-        print('Se accedio exitosamente a la primera grabación')
+        print('Se accedio exitosamente a la grabación')
 
-def downloadVideoFromPRO(tabToVideo,name):
+def downloadVideoFromPRO(tabToVideo,name,dir):
     driver.switch_to_window(tabToVideo)
-    time.sleep(60*5)
     html = driver.execute_script("return document.body.innerHTML;")
     soup = BeautifulSoup(html, 'lxml')
     videoSrc = soup.find('video').get('src')
     name= str(name) + ".mp4"
     r=requests.get(videoSrc, timeout=30, stream=True)
     print ('Conectado para descargar: ' + str(name))
-    f=open(name,'wb')
+    completeName = os.path.join(str(dir), name)
+    f=open(completeName,'wb')
     print ("Descargando: " + str(name))
     for chunk in r.iter_content(chunk_size=255): 
         if chunk: # filter out keep-alive new chunks
             f.write(chunk)
     print ("Se ha completado la descarga de: " + str(name))
     f.close()
+    driver.switch_to_window(driver.window_handles[0])
 
 def selectorToNameVideo(cssSelectorMirarAhora):
     tempName = cssSelectorMirarAhora.split(':')
@@ -125,28 +169,48 @@ def selectorToNameVideo(cssSelectorMirarAhora):
     tempName = tempName.lstrip()
     return tempName
 
+bfr = getCSSSelectorGrabationViewChargeButtons()
+
 openRecording(bfr)
 
 #Encuentra los botones de opcion de grabación
 buttonsToSeeNow = driver.find_elements_by_xpath("//*[contains(@id, 'options-dropdown-toggle')]")
 
+
+""" 
 tabs = driver.window_handles
 cTabIndex = tabs.index(driver.current_window_handle)
 tabs.pop(cTabIndex)
 #borrar los ya registrados
 
-downloadVideoFromPRO(tabs[0],selectorToNameVideo(bfr[0]))
-
-buttonsToSeeNow.pop(0)
+downloadVideoFromPRO(tabs[0],selectorToNameVideo(bfr[0]),currentCourses[-1])
 
 """ 
+buttonsToSeeNow.pop(0)
+
 #Da click en todos los botones de opcion de grabación
 for button in buttonsToSeeNow:
     button.click()
     bgvc = getCSSSelectorGrabationViewChargeButtons()
     openRecording(bgvc)
 
-""" 
+print('Las ventanas registradas son: \t' + str(tabsOnChrome))
+print('Y corresponden a:             \t' + str(nameOfTabsOnChrome))
+
+time.sleep(60*2)
+if(len(tabsOnChrome) == len(nameOfTabsOnChrome)):
+    currentRecord = 0
+    for nameRecording in nameOfTabsOnChrome:
+        if(str(nameRecording).split(':')[0] != 'CTab recordings of'):
+            print('Ha descargar ' + str(nameRecording) + '!')
+            downloadVideoFromPRO(tabsOnChrome[currentRecord],nameRecording,currentDir)
+        else:
+            print('Es la pagina principal, no se descarga nada de aqui')
+        currentRecord = currentRecord + 1
+else:
+    print('Error al registrar las paginas y sus nomnbres')
+    
+    
 
 """ 
 while(currentCourses): {
