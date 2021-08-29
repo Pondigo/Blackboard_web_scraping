@@ -6,6 +6,8 @@ chromedriver*
 Personal-Data.txt
 *.mp4
 test.py
+log_downloads.txt
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
